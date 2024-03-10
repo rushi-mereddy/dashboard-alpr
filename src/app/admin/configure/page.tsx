@@ -1,47 +1,55 @@
-"use client";
+"use client"
 
-// Import necessary libraries
-import { useState } from "react";
+// Page.tsx
+import { useState, useEffect } from "react";
 import {
-  Grid,
   Box,
+  Grid,
   Card,
-  Stack,
   Typography,
   Button,
   Modal,
   TextField,
 } from "@mui/material";
+// import { editor as ImageMapper } from '@overlapmedia/imagemapper';
 
-// components
+// import { Canvas } from 'fabric';
 import PageContainer from "@/app/(DashboardLayout)/components/container/PageContainer";
 import Logo from "@/app/(DashboardLayout)/layout/shared/logo/Logo";
-import { Margin } from "@mui/icons-material";
+import Image from "next/image";
+import DrawingSVG from "./DrawingSVG";
 
 const Config = () => {
-  // State to manage the modal visibility and camera details
+  const [isImageConfigModalOpen, setImageConfigModalOpen] = useState(false);
+  const [isDrawingModalOpen, setDrawingModalOpen] = useState(false);
+  const [selectedCamera, setSelectedCamera] = useState<{
+    name: string;
+    ipAddress: string;
+  } | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [coordinates, setCoordinates] = useState<{ x: number; y: number }[]>([]);
   const [isModalOpen, setModalOpen] = useState(false);
   const [cameraDetails, setCameraDetails] = useState({
     name: "",
     ipAddress: "",
   });
-  const [cameras, setCameras] = useState<{ name: string; ipAddress: string }[]>([]);
+  const [cameras, setCameras] = useState<{ name: string; ipAddress: string }[]>(
+    []
+  );
 
-  // Function to handle opening the modal
   const handleOpenModal = () => {
     setModalOpen(true);
   };
 
-  // Function to handle closing the modal
   const handleCloseModal = () => {
     setModalOpen(false);
   };
 
-  // Function to handle saving the camera details
   const handleSaveCamera = () => {
-    // Check if any field is empty before saving
-    if (cameraDetails.name.trim() === "" || cameraDetails.ipAddress.trim() === "") {
-      // Display an alert or handle the empty fields scenario
+    if (
+      cameraDetails.name.trim() === "" ||
+      cameraDetails.ipAddress.trim() === ""
+    ) {
       alert("Please fill in all fields before saving.");
       return;
     }
@@ -50,6 +58,42 @@ const Config = () => {
     setCameraDetails({ name: "", ipAddress: "" });
     handleCloseModal();
   };
+
+  const handleOpenImageConfigModal = (
+    camera: { name: string; ipAddress: string } | null
+  ) => {
+
+     const imageUrl = "https://d27p8o2qkwv41j.cloudfront.net/wp-content/uploads/2017/10/shutterstock_521926666-e1508347182482.jpg";
+    setSelectedImage(imageUrl);
+    setDrawingModalOpen(true);
+    // setSelectedCamera(camera);
+    // setImageConfigModalOpen(true);
+  };
+
+  const handleCloseImageConfigModal = () => {
+    setImageConfigModalOpen(false);
+  };
+
+const handleSubmitImage = (image: string) => {
+   const imageUrl = "https://d27p8o2qkwv41j.cloudfront.net/wp-content/uploads/2017/10/shutterstock_521926666-e1508347182482.jpg";
+    setSelectedImage(imageUrl);
+  setDrawingModalOpen(true);
+};
+
+
+  const handleCloseDrawingModal = () => {
+    setDrawingModalOpen(false);
+    setCoordinates([]); // Clear coordinates after closing the modal
+  };
+
+  const handleSaveCoordinates = () => {
+    alert(`Coordinates: ${JSON.stringify(coordinates)}`);
+    handleCloseDrawingModal();
+  };
+
+  useEffect(() => {
+
+  }, [isDrawingModalOpen, selectedImage]);
 
   return (
     <PageContainer title="Config" description="this is Config page">
@@ -92,19 +136,34 @@ const Config = () => {
                 <Logo />
               </Box>
 
-              {/* Displaying camera cards */}
               {cameras.map((camera, index) => (
-                <Card style={{padding: "10px", textAlign: "center", margin: "20px"}} key={index}>
+                <Card
+                  style={{
+                    padding: "10px",
+                    textAlign: "center",
+                    margin: "20px",
+                  }}
+                  key={index}
+                >
                   <Typography variant="h6">{camera.name}</Typography>
                   <Typography>{camera.ipAddress}</Typography>
+                  <Button
+                    variant="outlined"
+                    style={{
+                      marginTop: "8px",
+                      marginBottom: "15px",
+                    }}
+                    onClick={() => handleOpenImageConfigModal(camera)}
+                  >
+                    Configure
+                  </Button>
                 </Card>
               ))}
 
-                            {/* Button to open the modal */}
               <Button variant="contained" onClick={handleOpenModal}>
                 Add Camera
               </Button>
-              {/* Modal for adding camera details */}
+
               <Modal open={isModalOpen} onClose={handleCloseModal}>
                 <Box
                   sx={{
@@ -118,11 +177,22 @@ const Config = () => {
                     p: 4,
                   }}
                 >
-                  <Typography variant="h6" style={{marginTop: "8px", marginBottom: "15px"}}>Add Camera</Typography>
+                  <Typography
+                    variant="h6"
+                    style={{
+                      marginTop: "8px",
+                      marginBottom: "15px",
+                    }}
+                  >
+                    Add Camera
+                  </Typography>
                   <TextField
                     label="Camera Name"
                     value={cameraDetails.name}
-                     style={{marginTop: "8px", marginBottom: "15px"}}
+                    style={{
+                      marginTop: "8px",
+                      marginBottom: "15px",
+                    }}
                     onChange={(e) =>
                       setCameraDetails({
                         ...cameraDetails,
@@ -133,7 +203,10 @@ const Config = () => {
                   <TextField
                     label="IP Address"
                     value={cameraDetails.ipAddress}
-                     style={{marginTop: "8px", marginBottom: "15px"}}
+                    style={{
+                      marginTop: "8px",
+                      marginBottom: "15px",
+                    }}
                     onChange={(e) =>
                       setCameraDetails({
                         ...cameraDetails,
@@ -141,11 +214,106 @@ const Config = () => {
                       })
                     }
                   />
-                  <Button variant="contained"  style={{marginTop: "8px", marginBottom: "15px"}} onClick={handleSaveCamera}>
+                  <Button
+                    variant="contained"
+                    style={{
+                      marginTop: "8px",
+                      marginBottom: "15px",
+                    }}
+                    onClick={handleSaveCamera}
+                  >
                     Save
                   </Button>
                 </Box>
               </Modal>
+
+              <Modal
+                open={isImageConfigModalOpen}
+                onClose={handleCloseImageConfigModal}
+              >
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    width: 300,
+                    bgcolor: "background.paper",
+                    boxShadow: 24,
+                    p: 4,
+                  }}
+                >
+                  <Typography
+                    variant="h6"
+                    style={{
+                      marginTop: "8px",
+                      marginBottom: "15px",
+                    }}
+                  >
+                    Image Configuration
+                  </Typography>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const selectedFile = e.target.files?.[0];
+                      if (selectedFile) {
+                        const imageUrl = URL.createObjectURL(selectedFile);
+                        handleSubmitImage(imageUrl);
+                      }
+                    }}
+                    style={{ marginBottom: "15px" }}
+                  />
+                  <Button
+                    variant="contained"
+                    style={{
+                      marginTop: "8px",
+                      marginBottom: "15px",
+                    }}
+                    onClick={() => handleCloseImageConfigModal()}
+                  >
+                    Submit
+                  </Button>
+                </Box>
+              </Modal>
+
+        {/* Drawing Modal */}
+              <Modal open={isDrawingModalOpen} onClose={handleCloseDrawingModal}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 800,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography
+            variant="h6"
+            style={{
+              marginTop: '8px',
+              marginBottom: '15px',
+            }}
+          >
+            Draw Lines
+          </Typography>
+          {/* Display the selected image */}
+          {selectedImage && (
+            <DrawingSVG
+    imageUrl={selectedImage}
+    onCoordinatesSave={() => setCoordinates(coordinates)}
+/>
+
+
+          )}
+          {/* <Button variant="contained" onClick={handleSaveCoordinates}>
+            Save Coordinates
+          </Button> */}
+        </Box>
+      </Modal>
             </Card>
           </Grid>
         </Grid>
