@@ -2,6 +2,7 @@ import {
   IconAperture,
   IconCopy,
   IconLayoutDashboard,
+  IconSettings2,
   IconLogin,
   IconMoodHappy,
   IconTypography,
@@ -16,6 +17,12 @@ const Menuitems = [
     title: "Dashboard",
     icon: IconLayoutDashboard,
     href: "/",
+  },
+  {
+    id: uniqueId(),
+    title: "Configure",
+    icon: IconSettings2,
+    href: "/admin/configure",
   },
 ];
 
